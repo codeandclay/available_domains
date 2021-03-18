@@ -295,11 +295,16 @@
       })
     }
 
-    var message = "Coming soon"
+    function url_for(domain) {
+      var account_id = "2728870";
+      return "https://namecheap.pxf.io/c/" +
+              account_id +
+              "/386170/5618?u=https%3A%2F%2Fwww.namecheap.com%2Fdomains%2Fregistration%2Fresults.aspx%3Fdomain%3D" +
+              domain
+    }
 
     function action_for(domain) {
-      var message = "'Coming soon.'";
-      return '<a href="#" onclick="alert(' + message + ');">buy</a>';
+      return '<a href="' + url_for(domain) + '">buy</a>';
     }
 
     function replace_table_with(table) {
