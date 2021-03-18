@@ -1,0 +1,311 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goodi.sh</title>
+  <style>
+    :root {
+      font-size: calc(1rem + 0.25vw);
+      --green: #aded4f;
+      --pink: #ed4fad;
+    }
+
+    html {
+      box-sizing: border-box;
+    }
+
+    * > * + * {
+      margin-bottom: 1rem;
+    }
+
+    body {
+      padding-top: 1rem;
+    }
+
+    body, table {
+      font-family: -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, roboto, noto, arial, sans-serif;
+    }
+
+    .container {
+      margin: 0 auto;
+      max-width: 40rem;
+    }
+
+    h1 {
+      font-size: calc(1.5rem + 0.25vw);
+    }
+
+    label, table, .meta {
+      font-family: Menlo, Consolas, Monaco, Liberation Mono, Lucida Console, monospace;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    table a {
+      padding: 0.5rem;
+      border-radius: 2px;
+      background-color: black;
+      color: white;
+    }
+
+    tr {
+      border-style: solid;
+      border-width: 1px;
+      border-color: black;
+    }
+
+    tr:nth-child(even) {
+      background: black;
+      color: white;
+    }
+
+    tr:nth-child(even) a {
+      background-color: white;
+      color: black;
+    }
+
+    tr:nth-child(odd) {
+      background: white;
+    }
+
+    tr:hover {
+      background-color: var(--green);
+      color: black;
+    }
+
+    tr:hover a {
+      background-color: var(--pink);
+      color: black;
+    }
+
+    td {
+      padding: 1rem;
+    }
+
+    .domain_name {
+      text-transform: capitalize;
+    }
+
+    ul {
+      padding: 0;
+    }
+
+    .options ul {
+      display: inline;
+      list-style: none;
+    }
+
+    .options li {
+      display: inline;
+    }
+
+    .filter {
+      display: inline;
+      float: right;
+    }
+
+    .options-container {
+      margin-bottom: 1rem;
+    }
+
+    .options {
+      display: inline;
+    }
+
+    .options button, input {
+      background-color: white;
+      border-color: black;
+      border-style: solid;
+      border-width: 1px;
+    }
+
+    .options button {
+      font-family: Menlo, Consolas, Monaco, Liberation Mono, Lucida Console, monospace;
+      margin: 0;
+      background-color: black;
+      color: white;
+    }
+
+    input {
+      margin: 0;
+    }
+
+    label {
+      vertical-align: middle;
+      box-sizing: border-box;
+    }
+
+    button:hover {
+      cursor: pointer;
+    }
+
+    button, input {
+      padding: 0.25rem;
+    }
+
+    footer {
+      text-align: center;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>.sh domains</h1>
+    <p>A list of available dictionary word domain names ending with the <strong>.sh</strong> TLD.</p>
+    <div class="meta" id="meta">
+      <p>Last update: <span id="timestamp"></span><p>
+      <p>Found: <span id="domain_count"><span></p>
+    </div>
+
+    <div class="options-container">
+      <ul class="options">
+        <li>
+          <ul class="order_buttons">
+            <li><button id="order_by_name_button">sort by name</button></li>
+            <li><button id="order_by_length_button">sort by length</button></li>
+          </ul>
+        </li>
+
+        <li>
+          <div class="filter">
+            <label for="filter_field">Filter by: </label>
+            <input type="text" name="filter_field" id="filter_field" spellcheck="false">
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <table id="domains_table">
+      <!-- domains listed here -->
+    </table>
+
+  <footer>
+    <p>This list is maintained at <a href="https://github.com/codeandclay/goodi.sh-names">https://github.com/codeandclay/goodi.sh-names</a></p>
+  </footer>
+
+  <script>
+    const getJSON = async url => {
+      const response = await fetch(url);
+      return response.json();
+    }
+
+    // initial table data
+    var domains = [];
+
+    // fetch remote data and display
+    getJSON("https://raw.githubusercontent.com/codeandclay/goodi.sh-names/main/available_sh_domains.json")
+      .then(data => {
+        domains = data['domains'];
+        replace_table_with(new_table_from(domains));
+        document.getElementById('timestamp').innerText = data['updated'];
+        document.getElementById('domain_count').innerText = domains.length;
+      });
+
+    // table filtering
+    var filter_field = document.getElementById('filter_field');
+    filter_field.addEventListener('input', filter_table);
+
+    function filter_table() {
+      table = new_table_from(filtered(domains))
+      if(table.rows.length < 1) {
+        table.insertRow(0).insertCell(0).innerText = "No results found!";
+      }
+      replace_table_with(table);
+    }
+
+    function filtered(strings) {
+      return strings.filter(string => string.replace('.','').includes(filter_field.value));
+    }
+
+    // table ordering
+    var SORT_ORDERS = ['asc', 'desc'];
+    var sort_order = SORT_ORDERS[0];
+
+    var order_by_name_button = document.getElementById('order_by_name_button');
+    var order_by_length_button = document.getElementById('order_by_length_button');
+
+    order_by_name_button.addEventListener('click', order_table_by_name);
+    order_by_length_button.addEventListener('click', order_table_by_length);
+
+    function order_table_by_name() {
+      domains.sort();
+      handle_order_direction();
+      replace_table_with(new_table_from(filtered(domains)));
+    }
+
+    function order_table_by_length() {
+      domains.sort().sort((a,b) => a.length - b.length);
+      handle_order_direction();
+      replace_table_with(new_table_from(filtered(domains)));
+    }
+
+    function handle_order_direction(){
+      if(sort_order == 'desc') { domains.reverse() };
+      reverse_sort_orders();
+    }
+
+    function reverse_sort_orders() {
+      sort_order = SORT_ORDERS.find( order => order !== sort_order);
+    }
+
+    // table creation
+    function new_table_from(names) {
+      var table = document.createElement('table');
+      var tbody = document.createElement('tbody');
+
+      table.id = 'domains_table';
+
+      rows_from(names).forEach(row => {
+        tbody.appendChild(row);
+      });
+      table.appendChild(tbody);
+
+      return table;
+    }
+
+    function row_from(name) {
+      var dictionary_name_col = document.createElement('td');
+      var domain_name_col = document.createElement('td');
+      var action_col = document.createElement('td');
+
+      [dictionary_name_col, domain_name_col, action_col].forEach(function(el){
+        el.setAttribute('align', 'center');
+      });
+
+      dictionary_name_col.textContent = name.replace('.','');
+      domain_name_col.textContent = name;
+      action_col.innerHTML = action_for(name);
+
+      var row = document.createElement('tr');
+
+      row.appendChild(dictionary_name_col);
+      row.appendChild(domain_name_col);
+      row.appendChild(action_col);
+
+      return row;
+    }
+
+    function rows_from(name) {
+      return name.map(name => {
+        return row_from(name)
+      })
+    }
+
+    var message = "Coming soon"
+
+    function action_for(domain) {
+      var message = "'Coming soon.'";
+      return '<a href="#" onclick="alert(' + message + ');">buy</a>';
+    }
+
+    function replace_table_with(table) {
+      document.getElementById('domains_table').replaceWith(table);
+    }
+
+  </script>
+</body>
+</html>
