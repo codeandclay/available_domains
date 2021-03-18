@@ -93,26 +93,40 @@
       padding: 0;
     }
 
-    .options ul {
-      display: inline;
-      list-style: none;
-    }
-
-    .options li {
-      display: inline;
-    }
-
-    .filter {
-      display: inline;
-      float: right;
-    }
-
-    .options-container {
-      margin-bottom: 1rem;
+    .options, .options ul {
+      display: inline-flex;
+      flex-flow: row wrap;
+      justify-content: space-between;
+      width: 100%;
     }
 
     .options {
-      display: inline;
+      align-items: center;
+      font-size: 0.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .options ul {
+      width: 100%;
+    }
+
+    .options, .options ul {
+      list-style: none;
+    }
+
+    .filter {
+      display: inline-flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .filter label {
+      margin-right: 0.5rem;
+    }
+
+    .order_buttons li button {
+      font-size: 0.5rem;
+      margin-right: 0.5rem;
     }
 
     .options button, input {
@@ -133,11 +147,6 @@
       margin: 0;
     }
 
-    label {
-      vertical-align: middle;
-      box-sizing: border-box;
-    }
-
     button:hover {
       cursor: pointer;
     }
@@ -148,6 +157,7 @@
 
     footer {
       text-align: center;
+      font-size: 0.5rem;
     }
 
   </style>
@@ -161,26 +171,30 @@
       <p>Found: <span id="domain_count"><span></p>
     </div>
 
-    <div class="options-container">
-      <ul class="options">
-        <li>
-          <ul class="order_buttons">
-            <li><button id="order_by_name_button">sort by name</button></li>
-            <li><button id="order_by_length_button">sort by length</button></li>
-          </ul>
-        </li>
-
-        <li>
-          <div class="filter">
-            <label for="filter_field">Filter by: </label>
-            <input type="text" name="filter_field" id="filter_field" spellcheck="false">
-          </div>
-        </li>
-      </ul>
-    </div>
+    <ul class="options">
+      <!-- sort order -->
+      <li>
+        <ul class="order_buttons">
+          <li><button id="order_by_name_button">sort by name</button></li>
+          <li><button id="order_by_length_button">sort by length</button></li>
+        </ul>
+      </li>
+      <!-- filter -->
+      <li class="filter">
+        <label for="filter_field">Filter by: </label>
+        <input type="text" name="filter_field" id="filter_field" spellcheck="false">
+      </li>
+    </ul>
 
     <table id="domains_table">
       <!-- domains listed here -->
+      <!-- tbody -->
+        <!-- tr -->
+          <!-- td -->
+          <!-- td -->
+          <!-- td -->
+        <!-- /tr -->
+      <!-- /tbody -->
     </table>
 
   <footer>
@@ -232,12 +246,14 @@
     order_by_length_button.addEventListener('click', order_table_by_length);
 
     function order_table_by_name() {
+      reverse_sort_orders();
       domains.sort();
       handle_order_direction();
       replace_table_with(new_table_from(filtered(domains)));
     }
 
     function order_table_by_length() {
+      reverse_sort_orders();
       domains.sort().sort((a,b) => a.length - b.length);
       handle_order_direction();
       replace_table_with(new_table_from(filtered(domains)));
@@ -245,7 +261,6 @@
 
     function handle_order_direction(){
       if(sort_order == 'desc') { domains.reverse() };
-      reverse_sort_orders();
     }
 
     function reverse_sort_orders() {
