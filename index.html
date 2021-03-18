@@ -39,9 +39,12 @@
       font-family: Menlo, Consolas, Monaco, Liberation Mono, Lucida Console, monospace;
     }
 
+    .table-container {
+      overflow-y: hidden;
+    }
+
     table {
       width: 100%;
-      border-collapse: collapse;
       border-style: solid;
       border-width: 1px;
       border-color: black;
@@ -79,7 +82,7 @@
     }
 
     td {
-      padding: 1rem 0 1rem 0rem;
+      padding: 1rem 1rem 1rem 0rem;
     }
 
     .domain_name {
@@ -156,23 +159,6 @@
       text-align: center;
       font-size: 0.5rem;
     }
-
-    /*responsive media queries*/
-    @media only screen and (max-width: 420px) {
-      td:nth-child(1) {
-        display:none;
-      }
-      table {
-        max-width: 100%;
-      }
-      td {
-        display: block;
-        width: 100%;
-      }
-      td:nth-child(2) {
-        margin-bottom: 0rem;
-      }
-    }
   </style>
 </head>
 <body>
@@ -199,16 +185,18 @@
       </li>
     </ul>
 
-    <table id="domains_table">
-      <!-- domains listed here -->
-      <!-- tbody -->
-        <!-- tr -->
-          <!-- td -->
-          <!-- td -->
-          <!-- td -->
-        <!-- /tr -->
-      <!-- /tbody -->
-    </table>
+    <div class="table-container">
+      <table id="domains_table">
+        <!-- domains listed here -->
+        <!-- tbody -->
+          <!-- tr -->
+            <!-- td -->
+            <!-- td -->
+            <!-- td -->
+          <!-- /tr -->
+        <!-- /tbody -->
+      </table>
+    </div>
 
   <footer>
     <p>This list is maintained at <a href="https://github.com/codeandclay/goodi.sh-names">https://github.com/codeandclay/goodi.sh-names</a></p>
