@@ -234,7 +234,7 @@
     }
 
     function filtered(strings) {
-      return strings.filter(string => string.replace('.','').includes(filter_field.value));
+      return strings.filter(string => string.replace('.','').includes(filter_field.value.replace('.','')));
     }
 
     // table ordering
