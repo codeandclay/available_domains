@@ -2,6 +2,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Find available dictionary word domain names ending with the .sh top level domain.">
+  <meta name="robots" content="follow,index">
   <title>Goodi.sh</title>
   <style>
     :root {
@@ -22,7 +24,7 @@
       padding-top: 1rem;
     }
 
-    body, table {
+    body {
       font-family: -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, roboto, noto, arial, sans-serif;
     }
 
@@ -35,59 +37,70 @@
       font-size: calc(1.5rem + 0.25vw);
     }
 
-    label, table, .meta {
+    label, table, .meta, .domain {
       font-family: Menlo, Consolas, Monaco, Liberation Mono, Lucida Console, monospace;
     }
 
-    .table-container {
-      overflow-y: hidden;
-    }
-
-    table {
-      border-collapse: collapse;
-      width: 100%;
+    .domains {
       border-style: solid;
       border-width: 1px;
       border-color: black;
+      margin-top: 0;
     }
 
-    table a {
+    .domain {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      list-style: none;
+      padding: 0.5rem;
+      margin-bottom: 0rem;
+    }
+
+    .domain > * {
+      margin: 0;
+    }
+
+    .domain a {
       padding: 0.5rem;
       border-radius: 2px;
       background-color: black;
       color: white;
     }
 
-    tr:nth-child(even) {
+    .domain:nth-child(odd) {
+      background: white;
+      color: black;
+    }
+
+    .domain:nth-child(even) {
       background: black;
       color: white;
     }
 
-    tr:nth-child(even) a {
-      background-color: white;
+    .domain:nth-child(even) a {
+      background: white;
       color: black;
     }
 
-    tr:nth-child(odd) {
-      background: white;
-    }
-
-    tr:hover {
+    .domain:hover {
       background-color: var(--green);
       color: black;
     }
 
-    tr:hover a {
+    .domain:hover > a {
       background-color: var(--pink);
-      color: black;
     }
 
-    td {
-      padding: 1rem 1rem 1rem 0rem;
+    .table-container {
+      overflow-y: hidden;
     }
 
-    .domain_name {
-      text-transform: capitalize;
+    @media only screen and (max-width: 600px) {
+      .dictionary-word {
+        display: none;
+      }
     }
 
     ul {
@@ -165,9 +178,9 @@
 <body>
   <div class="container">
     <h1>.sh domains</h1>
-    <p>A list of available dictionary word domain names ending with the <strong>.sh</strong> TLD.</p>
+    <p>A list of available dictionary word domain names ending with the <strong>.sh</strong> top level domain.</p>
     <div class="meta" id="meta">
-      <p>Last update: <span id="timestamp"></span><p>
+      <p>Last update: <span class="timestamp"></span><p>
       <p>Found: <span id="domain_count"><span></p>
     </div>
 
@@ -186,21 +199,12 @@
       </li>
     </ul>
 
-    <div class="table-container">
-      <table id="domains_table">
-        <!-- domains listed here -->
-        <!-- tbody -->
-          <!-- tr -->
-            <!-- td -->
-            <!-- td -->
-            <!-- td -->
-          <!-- /tr -->
-        <!-- /tbody -->
-      </table>
-    </div>
+    <ul class="domains" id="domains">
+      <!-- domain list here -->
+    </ul>
 
   <footer>
-    <p>This list is maintained at <a href="https://github.com/codeandclay/goodi.sh-names">https://github.com/codeandclay/goodi.sh-names</a></p>
+    <p>This list is updated throughout the day. Last update: <span class="timestamp"></span></p>
   </footer>
 
   <script>
@@ -216,21 +220,18 @@
     getJSON("https://raw.githubusercontent.com/codeandclay/goodi.sh-names/main/available_sh_domains.json")
       .then(data => {
         domains = data['domains'];
-        replace_table_with(new_table_from(domains));
-        document.getElementById('timestamp').innerText = data['updated'];
+        replace_list_with(new_list_from(domains));
+        document.querySelectorAll('.timestamp').forEach(e => e.innerText = data['updated']);
         document.getElementById('domain_count').innerText = domains.length;
       });
 
-    // table filtering
+    // list filtering
     var filter_field = document.getElementById('filter_field');
-    filter_field.addEventListener('input', filter_table);
+    filter_field.addEventListener('input', filter_list);
 
-    function filter_table() {
-      table = new_table_from(filtered(domains))
-      if(table.rows.length < 1) {
-        table.insertRow(0).insertCell(0).innerText = "No results found!";
-      }
-      replace_table_with(table);
+    function filter_list() {
+      list = new_list_from(filtered(domains))
+      replace_list_with(list);
     }
 
     function filtered(strings) {
@@ -244,21 +245,21 @@
     var order_by_name_button = document.getElementById('order_by_name_button');
     var order_by_length_button = document.getElementById('order_by_length_button');
 
-    order_by_name_button.addEventListener('click', order_table_by_name);
-    order_by_length_button.addEventListener('click', order_table_by_length);
+    order_by_name_button.addEventListener('click', order_list_by_name);
+    order_by_length_button.addEventListener('click', order_list_by_length);
 
-    function order_table_by_name() {
+    function order_list_by_name() {
       reverse_sort_orders();
       domains.sort();
       handle_order_direction();
-      replace_table_with(new_table_from(filtered(domains)));
+      replace_list_with(new_list_from(filtered(domains)));
     }
 
-    function order_table_by_length() {
+    function order_list_by_length() {
       reverse_sort_orders();
       domains.sort().sort((a,b) => a.length - b.length);
       handle_order_direction();
-      replace_table_with(new_table_from(filtered(domains)));
+      replace_list_with(new_list_from(filtered(domains)));
     }
 
     function handle_order_direction(){
@@ -269,47 +270,52 @@
       sort_order = SORT_ORDERS.find( order => order !== sort_order);
     }
 
-    // table creation
-    function new_table_from(names) {
-      var table = document.createElement('table');
-      var tbody = document.createElement('tbody');
+    // list creation
+    function new_list_from(names) {
+      var unordered_list = document.createElement('ul');
+      unordered_list.id = 'domains';
+      unordered_list.className = 'domains';
 
-      table.id = 'domains_table';
-
-      rows_from(names).forEach(row => {
-        tbody.appendChild(row);
-      });
-      table.appendChild(tbody);
-
-      return table;
-    }
-
-    function row_from(name) {
-      var dictionary_name_col = document.createElement('td');
-      var domain_name_col = document.createElement('td');
-      var action_col = document.createElement('td');
-
-      [dictionary_name_col, domain_name_col, action_col].forEach(function(el){
-        el.setAttribute('align', 'center');
+      items_from(names).forEach(item => {
+        unordered_list.appendChild(item);
       });
 
-      dictionary_name_col.textContent = name.replace('.','');
-      domain_name_col.textContent = name;
-      action_col.innerHTML = action_for(name);
-
-      var row = document.createElement('tr');
-
-      row.appendChild(dictionary_name_col);
-      row.appendChild(domain_name_col);
-      row.appendChild(action_col);
-
-      return row;
+      return unordered_list;
     }
 
-    function rows_from(name) {
-      return name.map(name => {
-        return row_from(name)
+    function item_from(name) {
+      var list_item = document.createElement('li');
+      list_item.className = 'domain';
+
+      var dictionary_name_div = document.createElement('div');
+      var domain_name_div = document.createElement('div');
+
+      dictionary_name_div.className = 'dictionary-word';
+      domain_name_div.className = 'domain-name';
+
+      dictionary_name_div.textContent = name.replace('.','');
+      domain_name_div.textContent = name;
+
+      var buy_domain_link = document.createElement('a');
+      buy_domain_link.textContent = 'buy domain';
+      buy_domain_link.href = url_for(name);
+      buy_domain_link.target = '_blank';
+
+      [dictionary_name_div, domain_name_div, buy_domain_link].forEach(item => {
+        list_item.appendChild(item);
+      });
+
+      return list_item;
+    }
+
+    function items_from(names) {
+      return names.map(name => {
+        return item_from(name)
       })
+    }
+
+    function replace_list_with(list) {
+      document.getElementById('domains').replaceWith(list);
     }
 
     function url_for(domain) {
@@ -319,15 +325,6 @@
               "/386170/5618?u=https%3A%2F%2Fwww.namecheap.com%2Fdomains%2Fregistration%2Fresults.aspx%3Fdomain%3D" +
               domain
     }
-
-    function action_for(domain) {
-      return '<a href="' + url_for(domain) + '" target="_blank">buy</a>';
-    }
-
-    function replace_table_with(table) {
-      document.getElementById('domains_table').replaceWith(table);
-    }
-
   </script>
 </body>
 </html>
