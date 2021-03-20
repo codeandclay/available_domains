@@ -214,16 +214,17 @@
     }
 
     // initial table data
-    var domains = [];
+    var domains = {{& domains }};
 
     // fetch remote data and display
     getJSON("https://raw.githubusercontent.com/codeandclay/goodi.sh-names/main/available_sh_domains.json")
       .then(data => {
         domains = data['domains'];
         replace_list_with(new_list_from(domains));
-        document.querySelectorAll('.timestamp').forEach(e => e.innerText = data['updated']);
-        document.getElementById('domain_count').innerText = domains.length;
       });
+
+    document.getElementById('domain_count').innerText = domains.length;
+    document.querySelectorAll('.timestamp').forEach(e => e.innerText = "{{ timestamp }}" );
 
     // list filtering
     var filter_field = document.getElementById('filter_field');
@@ -318,7 +319,6 @@
       document.getElementById('domains').replaceWith(list);
 
       if (filtered(domains).length < 1) {
-        console.log('on')
         document.getElementById('domains').innerHTML = "<li>No domains found</li>"
       }
     }
