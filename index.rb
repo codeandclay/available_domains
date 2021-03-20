@@ -22,4 +22,3 @@ class Index < Mustache
   end
 end
 
-File.open('index.html','w') { |f| f.puts Index.render }
