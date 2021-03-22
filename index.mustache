@@ -181,8 +181,8 @@
     <h1>.sh domains</h1>
     <p>A list of available dictionary word domain names ending with the <strong>.sh</strong> top level domain.</p>
     <div class="meta" id="meta">
-      <p>Last update: <span class="timestamp"></span><p>
-      <p>Found: <span id="domain_count"><span></p>
+      <p>Last update: <span class="timestamp">{{ timestamp }}</span><p>
+      <p>Found: <span id="domain_count">{{ count }}<span></p>
     </div>
 
     <ul class="options">
@@ -205,72 +205,51 @@
     </ul>
 
   <footer>
-    <p>This list is updated throughout the day. Last update: <span class="timestamp"></span></p>
+    <p>This list is updated throughout the day. Last update: <span class="timestamp">{{ timestamp }}</span></p>
   </footer>
 
   <script>
-    const getJSON = async url => {
-      const response = await fetch(url);
-      return response.json();
-    }
-
     // initial table data
-    var domains = {{& domains }};
+    var domains = {{{ domain_names }}};
 
-    // fetch remote data and display
-    getJSON("https://raw.githubusercontent.com/codeandclay/goodi.sh-names/main/available_sh_domains.json")
-      .then(data => {
-        domains = data['domains'];
-        replace_list_with(new_list_from(domains));
-      });
+    var filter_field = document.getElementById('filter_field');
+    filter_field.addEventListener('input', () => { replace_list_with(filter_list()) });
 
-    document.getElementById('domain_count').innerText = domains.length;
-    document.querySelectorAll('.timestamp').forEach(e => e.innerText = "{{ timestamp }}" );
+    replace_list_with(new_list_from(domains));
 
     // list filtering
-    var filter_field = document.getElementById('filter_field');
-    filter_field.addEventListener('input', filter_list);
-
     function filter_list() {
-      list = new_list_from(filtered(domains))
-      replace_list_with(list);
+      return new_list_from(filtered(domains))
     }
 
-    function filtered(strings) {
-      return strings.filter(string => string.replace('.','').includes(filter_field.value.replace('.','')));
+    function filtered(domains) {
+      return domains.filter(domain => domain.replace('.','').includes(filter_field.value.replace('.','')));
     }
 
     // table ordering
-    var SORT_ORDERS = ['asc', 'desc'];
-    var sort_order = SORT_ORDERS[0];
 
-    var order_by_name_button = document.getElementById('order_by_name_button');
-    var order_by_length_button = document.getElementById('order_by_length_button');
+    //// sorting strategies
+    var sort_alphabetically = (a,b) => ( a < b );
+    var sort_by_length = (a,b) => a.length - b.length;
 
-    order_by_name_button.addEventListener('click', order_list_by_name);
-    order_by_length_button.addEventListener('click', order_list_by_length);
+    var reverse_sort = false;
 
-    function order_list_by_name() {
-      reverse_sort_orders();
-      domains.sort();
-      handle_order_direction();
-      replace_list_with(new_list_from(filtered(domains)));
+    function order_domains_by(strategy){
+      // The double call to sort() ensures that when names are ordered by
+      // length, the order is always the same.
+      domains.sort().sort(strategy);
+
+      if(reverse_sort) { domains.reverse() };
+      reverse_sort = !reverse_sort;
+
+      return new_list_from(filtered(domains));
     }
 
-    function order_list_by_length() {
-      reverse_sort_orders();
-      domains.sort().sort((a,b) => a.length - b.length);
-      handle_order_direction();
-      replace_list_with(new_list_from(filtered(domains)));
-    }
-
-    function handle_order_direction(){
-      if(sort_order == 'desc') { domains.reverse() };
-    }
-
-    function reverse_sort_orders() {
-      sort_order = SORT_ORDERS.find( order => order !== sort_order);
-    }
+    document.getElementById('order_by_name_button').
+             addEventListener('click', () => replace_list_with(order_domains_by(sort_alphabetically)));
+    
+    document.getElementById('order_by_length_button').
+             addEventListener('click', () => replace_list_with(order_domains_by(sort_by_length)));
 
     // list creation
     function new_list_from(names) {

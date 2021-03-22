@@ -7,8 +7,18 @@ class Index < Mustache
     json['updated']
   end
 
+  def domain_names
+    domains.map(&:name)
+  end
+
   def domains
-    json['domains']
+    json['domains'].to_a.map do |domain|
+      Domain.new(domain)
+    end
+  end
+
+  def count
+    domains.count
   end
 
   private
@@ -22,3 +32,26 @@ class Index < Mustache
   end
 end
 
+class Domain
+  attr_reader :name
+
+  def initialize(name)
+    @name = name
+  end
+
+  def dictionary_word
+    name.delete('.')
+  end
+
+  def buy_url
+    "https://google.com/#{name}"
+  end
+
+  def to_h
+    {
+      dictionary_word: dictionary_word,
+      buy_url: buy_url,
+      name: name
+    }
+  end
+end
