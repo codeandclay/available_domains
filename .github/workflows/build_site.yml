@@ -1,6 +1,5 @@
 on:
   workflow_dispatch:
-  push:
 jobs:
   build_site:
     runs-on: macos-latest
