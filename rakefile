@@ -1,6 +1,0 @@
-require_relative('index')
-
-task :default do
-  puts "Building page from template"
-  File.open('index.html','w') { |f| f.puts Index.render }
-end
